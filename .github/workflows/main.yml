@@ -1,0 +1,49 @@
+name: Compilar APK Android
+
+on:
+push:
+branches: [ "main", "master" ]
+workflow_dispatch:
+
+jobs:
+build-android-apk:
+name: Gerar APK com Flet
+runs-on: ubuntu-latest
+
+steps:
+  - name: 1. Baixar código do repositório
+    uses: actions/checkout@v4
+
+  - name: 2. Configurar Python 3.11
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.11'
+
+  - name: 3. Configurar Java 17 (Requisito Android)
+    uses: actions/setup-java@v4
+    with:
+      distribution: 'zulu'
+      java-version: '17'
+
+  - name: 4. Configurar Flutter SDK
+    uses: subosito/flutter-action@v2
+    with:
+      channel: 'stable'
+
+  - name: 5. Instalar Flet e yt-dlp
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+
+  - name: 6. Compilar o APK
+    run: |
+      if [ -f "mobile_main.py" ] && [ ! -f "main.py" ]; then
+        cp mobile_main.py main.py
+      fi
+      flet build apk --verbose
+
+  - name: 7. Disponibilizar APK para Download
+    uses: actions/upload-artifact@v4
+    with:
+      name: MediaGrabPro-Android-APK
+      path: build/apk/**/*.apk
