@@ -2,17 +2,16 @@ name: Compilar APK Android
 
 on:
 push:
-branches: \[ "main", "master" \]
-workflow_dispatch: 
+branches: [ "main", "master" ]
+workflow_dispatch:
 
 jobs:
 build-android-apk:
 name: Gerar APK com Flet
 runs-on: ubuntu-latest
-
 steps:
-  - name: 1. Baixar código do repositório
-    uses: actions/checkout@v4
+- name: 1. Baixar código do repositório
+uses: actions/checkout@v4
 
   - name: 2. Configurar Python 3.11
     uses: actions/setup-python@v5
@@ -47,4 +46,3 @@ steps:
     with:
       name: MediaGrabPro-Android-APK
       path: build/apk/**/*.apk
-      
