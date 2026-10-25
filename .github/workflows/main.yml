@@ -2,8 +2,8 @@ name: Compilar APK Android
 
 on:
 push:
-branches: [ "main", "master" ]
-workflow_dispatch:
+branches: \[ "main", "master" \]
+workflow_dispatch: 
 
 jobs:
 build-android-apk:
@@ -47,3 +47,4 @@ steps:
     with:
       name: MediaGrabPro-Android-APK
       path: build/apk/**/*.apk
+      
