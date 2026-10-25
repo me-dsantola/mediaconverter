@@ -9,52 +9,53 @@ jobs:
   build-android-apk:
     name: Gerar APK com Flet
     runs-on: ubuntu-latest
-
     steps:
       - name: 1. Baixar código do repositório
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Java 17 (Requisito Android)
+      - name: 2. Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # Ativa cache automático para acelerar builds futuros
+
+      - name: 3. Configurar Java 17 (Requisito Android)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 3. Configurar Android SDK
+      - name: 4. Configurar SDK do Android (Correção Google Tools)
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
-      - name: 4. Configurar Flutter SDK
+      - name: 5. Configurar Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
 
-      - name: 5. Configurar Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: 6. Instalar Flet e dependências
+      - name: 6. Instalar Flet e yt-dlp
         run: |
           python -m pip install --upgrade pip
-          if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt
-          else
-            pip install flet yt-dlp
-          fi
+          pip install flet==0.24.1 yt-dlp
 
       - name: 7. Compilar o APK
         run: |
           if [ -f "mobile_main.py" ] && [ ! -f "main.py" ]; then
             cp mobile_main.py main.py
           fi
-          # Garante que o Flutter está no PATH para o Flet encontrar
-          export PATH="$FLUTTER_ROOT/bin:$PATH"
-          flet build apk --verbose
+          # Aceita os termos de licença do Android SDK que o Flet/Flutter exigem
+          yes | sdkmanager --licenses || true
+          
+          # EXECUÇÃO CORRIGIDA: Chama o Flet como um módulo nativo do Python
+          python -m flet build apk --verbose
 
       - name: 8. Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: MediaGrabPro-Android-APK
-          path: build/apk/app-release.apk
+          path: |
+            build/apk/*.apk
+            build/apk/**/*.apk
+          if-no-files-found: error
